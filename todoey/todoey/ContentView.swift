@@ -14,35 +14,42 @@ struct Todo: Identifiable {
 }
 
 struct ContentView: View {
-    @State private var todos: [Todo] = []
+  @State private var todos: [Todo] = []
+  @State private var isPresented: Bool = false
+  @State private var title: String = "Todoey"
+  @State private var color: Color = .yellow
     
-    var body: some View {
-      ZStack {
-        Color.black.ignoresSafeArea()
+  var body: some View {
+    ZStack {
+      Color.black.ignoresSafeArea()
     VStack(alignment: .leading) {
-      Text("Todoey")
-        .font(.largeTitle)
-        .fontWeight(.bold)
-        .foregroundStyle(.yellow)
-        .padding(.leading)
+      HStack {
+        Text(title)
+          .font(.largeTitle)
+          .fontWeight(.bold)
+          .foregroundStyle(color)
+        
+        Spacer()
+        
+        Button {
+          isPresented.toggle()
+        } label: {
+          Image(systemName: "info.circle")
+            .resizable()
+            .frame(width: 30, height: 30)
+            .foregroundStyle(color)
+        }
+        .sheet(isPresented: $isPresented) {
+          InfoView(title: $title, color: $color)
+            .presentationBackground(Color.black)
+        }
+      }
+      .padding(.horizontal)
+      
     
       List {
         ForEach($todos) { $todo in
-          Button {
-            todo.isDone.toggle()
-          } label: {
-              HStack {
-                Image(systemName: todo.isDone ? "circle.fill" : "circle")
-                  .foregroundStyle(.yellow)
-                TextField("", text: $todo.item)
-                  .textFieldStyle(PlainTextFieldStyle())
-                  .font(.title2)
-                  .foregroundStyle(todo.isDone ? Color.gray : Color.white)
-              }
-              .padding(.vertical, 8)
-            }
-            .listRowBackground(Color.black)
-            .listRowSeparatorTint(.white)
+          TodoRowView(todo: $todo, color: $color)
           }
           .onDelete { indexSet in
             for index in indexSet {
@@ -54,15 +61,14 @@ struct ContentView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
       
-
         Button {
           todos.append(Todo(id: UUID(), item: "", isDone: false))
         } label: {
             HStack {
               Image(systemName: "plus.circle.fill")
-                .foregroundStyle(.yellow)
+                .foregroundStyle(color)
               Text("New Reminder")
-                .foregroundStyle(.yellow)
+                .foregroundStyle(color)
                 .font(.title2)
                 .fontWeight(.bold)
           }
